@@ -1,4 +1,4 @@
-// referencia da main
+// referencia a main
 const main = document.querySelector( ' main ' )
 // .btn-touggle e a classe do botão que está la em html 
 const buttonInsertText = document.querySelector('.btn-toggle')
@@ -12,9 +12,6 @@ const closeDivtextBox = document.querySelector('.close')
 const selectElement = document.querySelector('select')
 // pega o texto digitado na caixa 
 const textArea = document.querySelector('textarea')
-
-
-
 
 // cada img e texto que contem no site 
 const humanExpressions = [
@@ -47,9 +44,43 @@ const setVoice = event => {
     utterance.voice = selectedVoice
 }
 
+// map retorna um novo array do array original só que com cada item tranformado
+const addExpressionBoxesIntoDOM = ( ) => {
+    main.innerHTML = humanExpressions.map(({ img, text}) => `
+        <div class="expression-box" data-js="${text}">
+            <img src="${img}" alt="${text}" data-js="${text}">
+            <p class="info" data-js="${text}">${text}</p>
+        </div>
+    ` ).join( ' ' )
+}
 
+addExpressionBoxesIntoDOM( )
 
-// // tirei o humanExpressions e coloquei ( { img, text}) porque feita uma descontrução para 
+const setStyleOfClickedDiv = dataValue => {
+    const div = document.querySelector(`[data-js="${dataValue}"]`)
+    div.classList.add('active')
+    setTimeout( ( ) => {
+        div.classList.remove('active')
+    }, 1500)
+}
+
+main.addEventListener('click', event => {
+    const clickedElemente = event.target
+    const clickedElementeText = clickedElemente.dataset.js
+
+// CASO DEPOIS PRECISE ADICIONAR OUTRO ELEMENTO E SÓ PASSAR COMO PARAMENTRO 
+// DENTRO DO ARRAY EX. ['IMG', 'P', 'BOTTON']
+    const clickedElementTextMustBeSpoken = ['IMG', 'P'].some(elemetName => 
+        clickedElemente.tagName.toLowerCase( ) === elemetName.toLowerCase( ))
+
+    if (clickedElementTextMustBeSpoken ){
+        setTextMessage(clickedElementeText)
+        speakText ( )
+        setStyleOfClickedDiv (clickedElementeText )
+    }
+})
+                // // O CODIGO ABAIXO FOI REFEITO DE FORMA MAIS LIMPA E INTELIGENTE PELO ACIMA \\ \\
+// {// // tirei o humanExpressions e coloquei ( { img, text}) porque feita uma descontrução para 
 // // puxar cada img e text de cada elemento
 // const createExpressionBox = ( { img, text }) => {
 //     // cria uma div para cada img ( cada elemento )
@@ -76,40 +107,62 @@ const setVoice = event => {
 //     main.appendChild(div)
 // }
 
-humanExpressions.forEach(createExpressionBox)
+// humanExpressions.forEach(createExpressionBox)}
 
 // recebe let porque o valor está sendo modificado mais a frente
 let voices = [ ]
 // speechSynthesis e uma 
 speechSynthesis.addEventListener('voiceschanged', ( ) => {
-    voices = speechSynthesis.getVoices( )
+    voices = speechSynthesis.getVoices( )    
 
-    
-    // setando voz padrão
-    const googleVoice = voices.find( voice => 
+
+        // reduce estudar melhor 
+        const optionElements = voices.reduce( ( accumulator, {name, lang}) => {
+            accumulator +=  `<option value="${name}">${lang} | ${name}</option>`
+            return accumulator
+        }, ' ')
+
+        selectElement.innerHTML = optionElements
+
+            // setando voz padrão
+         const googleVoice = voices.find( voice => 
         voice.name === 'Google português do Brasil')
-    const microsoftVoice = voices.find ( voice =>
+        const microsoftVoice = voices.find ( voice =>
         voice.name === 'Microsoft Maria Desktop - Portuguese(Brazil)')
 
-    // esse name e lang esta sendo puxado do speechSynthesis, está sendo feito uma descontrução
-    voices.forEach( ({name, lang}) => {
-        const option = document.createElement( 'option' )
-
-        option.value = name
-
-        // condição de voz padrão
-
-        if (googleVoice && option.value === googleVoice.name){
+        if (googleVoice){
             utterance.voice = googleVoice
-            option.selected = true
-        } else if ( microsoftVoice && option.value === microsoftVoice.name){
+            const googleOptionElement = selectElement
+            .querySelector(`[value="${googleVoice.name}"]`)
+            googleOptionElement.selected = true
+        } else if (microsoftVoice){
             utterance.voice = microsoftVoice
-            option.selected = true
+            const microsoftOptionElement = selectElement
+            .querySelector(`[value="${microsoftVoice.name}"]`)
+            microsoftOptionElement.selected = true
         }
 
-        option.textContent = ` ${lang} | ${name} `
-        selectElement.appendChild(option) // está recebendo cada elemento e adicionando a option
-    })
+                // // O CODIGO ABAIXO FOI REFEITO DE FORMA MAIS LIMPA E INTELIGENTE PELO ACIMA \\ \\
+               
+    // // esse name e lang esta sendo puxado do speechSynthesis, está sendo feito uma descontrução
+    // voices.forEach( ({name, lang}) => {
+    //     const option = document.createElement( 'option' )
+
+    //     option.value = name
+
+    //     // condição de voz padrão
+
+    //     if (googleVoice && option.value === googleVoice.name){
+    //         utterance.voice = googleVoice
+    //         option.selected = true
+    //     } else if ( microsoftVoice && option.value === microsoftVoice.name){
+    //         utterance.voice = microsoftVoice
+    //         option.selected = true
+    //     }
+
+    //     option.textContent = ` ${lang} | ${name} `
+    //     selectElement.appendChild(option) // está recebendo cada elemento e adicionando a option
+    // })
 })
 
 
