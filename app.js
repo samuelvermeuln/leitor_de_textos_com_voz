@@ -110,40 +110,48 @@ main.addEventListener('click', event => {
 // humanExpressions.forEach(createExpressionBox)}
 
 // recebe let porque o valor está sendo modificado mais a frente
-let voices = [ ]
-// speechSynthesis e uma 
-speechSynthesis.addEventListener('voiceschanged', ( ) => {
-    voices = speechSynthesis.getVoices( )    
 
+const insertOptionElementsIntoDOM = voices => {
+      // reduce estudar melhor 
+      selectElement.innerHTML = voices.reduce( ( accumulator, {name, lang}) => {
+        accumulator +=  `<option value="${name}">${lang} | ${name}</option>`
+        return accumulator
+    }, ' ')
+}
 
-        // reduce estudar melhor 
-        const optionElements = voices.reduce( ( accumulator, {name, lang}) => {
-            accumulator +=  `<option value="${name}">${lang} | ${name}</option>`
-            return accumulator
-        }, ' ')
+const setUtterranceVoice = voice => {
+    utterance.voice = voice
+    const voiceOptionElement = selectElement
+    .querySelector(`[value="${voice.name}"]`)
+    voiceOptionElement.selected = true
+}
 
-        selectElement.innerHTML = optionElements
-
-            // setando voz padrão
-         const googleVoice = voices.find( voice => 
+const setPTBRVoices = voices => {
+    // setando voz padrão
+    const googleVoice = voices.find( voice => 
         voice.name === 'Google português do Brasil')
         const microsoftVoice = voices.find ( voice =>
         voice.name === 'Microsoft Maria Desktop - Portuguese(Brazil)')
 
         if (googleVoice){
-            utterance.voice = googleVoice
-            const googleOptionElement = selectElement
-            .querySelector(`[value="${googleVoice.name}"]`)
-            googleOptionElement.selected = true
+            setUtterranceVoice(googleVoice)
         } else if (microsoftVoice){
-            utterance.voice = microsoftVoice
-            const microsoftOptionElement = selectElement
-            .querySelector(`[value="${microsoftVoice.name}"]`)
-            microsoftOptionElement.selected = true
+            setUtterranceVoice(microsoftVoice)
         }
+}
 
-                // // O CODIGO ABAIXO FOI REFEITO DE FORMA MAIS LIMPA E INTELIGENTE PELO ACIMA \\ \\
-               
+let voices = [ ]
+// speechSynthesis e uma 
+speechSynthesis.addEventListener('voiceschanged', ( ) => {
+    voices = speechSynthesis.getVoices( )    
+
+    insertOptionElementsIntoDOM (voices)
+
+    setPTBRVoices(voices)
+
+
+
+// // O CODIGO ABAIXO FOI REFEITO DE FORMA MAIS LIMPA E INTELIGENTE PELO ACIMA \\ \\    
     // // esse name e lang esta sendo puxado do speechSynthesis, está sendo feito uma descontrução
     // voices.forEach( ({name, lang}) => {
     //     const option = document.createElement( 'option' )
